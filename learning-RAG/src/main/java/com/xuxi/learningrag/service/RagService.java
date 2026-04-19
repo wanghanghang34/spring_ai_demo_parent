@@ -1,0 +1,45 @@
+package com.xuxi.learningrag.service;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+@Service
+public class RagService {
+
+
+    private final ChatClient chatClient;
+    private final VectorStore vectorStore;
+
+    public RagService(ChatClient.Builder chatClientBuilder, VectorStore vectorStore) {
+        this.chatClient = chatClientBuilder.build();
+        this.vectorStore = vectorStore;
+    }
+
+    public String answerQuestion(String question) {
+        // 1. 使用 Builder 模式创建搜索请求，从向量数据库检索最相关的文档片段
+        List<Document> similarDocs = vectorStore.similaritySearch(
+                SearchRequest.builder()   // 获取构建器实例
+                        .query(question)  // 设置查询文本
+                        .topK(3)          // 设置返回相似文档的最大数量
+                        .build()          // 构建最终的 SearchRequest 对象
+        );
+
+        // 2. 构建提示词上下文
+        assert similarDocs != null;
+        String context = similarDocs.stream()
+                .map(Document::getText)
+                .collect(Collectors.joining("\n\n"));
+
+        // 3. 调用LLM，要求其基于上下文回答问题
+        return chatClient.prompt()
+                .system(s -> s.text("请只基于以下背景信息回答问题。如果背景信息中没有答案，请说明‘抱歉，知识库中暂无相关信息’。\n\n背景信息：\n{context}"))
+                .user(question)
+                .call()
+                .content();
+    }
+}
