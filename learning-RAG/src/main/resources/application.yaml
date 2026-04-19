@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: learning-RAG
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:sk-placeholder-key-for-testing}
+      base-url: https://api.openai.com/v1
+      embedding:
+        options:
+          model: text-embedding-ada-002
