@@ -34,7 +34,7 @@ public class RagController {
     // 基于知识库的问答（流式输出）
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter chat(@RequestBody String question) {
-        SseEmitter emitter = new SseEmitter(300_000L); // 5分钟超时
+        SseEmitter emitter = new SseEmitter(300000L); // 5分钟超时
         new Thread(() -> {
             try {
                 ragService.answerQuestionStream(question, chunk -> {

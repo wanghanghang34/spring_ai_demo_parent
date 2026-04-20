@@ -52,7 +52,7 @@ public class RagService {
         List<Document> similarDocs = vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query(question)
-                        .topK(3)
+                        .topK(1)
                         .build()
         );
 
@@ -67,7 +67,9 @@ public class RagService {
 
         // 2. 流式调用LLM（doOnNext逐块回调，blockLast阻塞直到流结束）
         chatClient.prompt()
-                .system("请只基于以下背景信息回答问题。如果背景信息中没有答案，请说明'抱歉，知识库中暂无相关信息'。\n\n背景信息：\n" + context)
+                .system("请只基于以下背景信息回答问题。" +
+                            "如果背景信息中没有答案，" +
+                            "请说明'抱歉，知识库中暂无相关信息'。\n\n背景信息：\n" + context)
                 .user(question)
                 .stream()
                 .content()
