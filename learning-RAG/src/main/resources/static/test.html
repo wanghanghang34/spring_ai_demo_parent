@@ -594,18 +594,42 @@
                     const reader = res.body.getReader();
                     const decoder = new TextDecoder();
                     let answer = '';
+                    let buffer = ''; // 缓冲区，用于处理跨块的数据
 
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
 
-                        const text = decoder.decode(value, { stream: true });
-                        // 解析 SSE data 行
-                        const lines = text.split('\n');
+                        // 解码并添加到缓冲区
+                        buffer += decoder.decode(value, { stream: true });
+                        
+                        // 按行分割处理
+                        const lines = buffer.split('\n');
+                        // 保留最后一个可能不完整的行
+                        buffer = lines.pop() || '';
+                        
                         for (const line of lines) {
-                            if (line.startsWith('data:')) {
-                                const chunk = line.substring(5);
-                                if (chunk.trim() === '[DONE]') continue;
+                            const trimmedLine = line.trim();
+                            // 跳过空行和注释
+                            if (!trimmedLine || trimmedLine.startsWith(':')) continue;
+                            
+                            if (trimmedLine.startsWith('data:')) {
+                                const chunk = trimmedLine.substring(5).trim();
+                                if (chunk === '[DONE]') continue;
+                                if (chunk) {
+                                    answer += chunk;
+                                    updateTypingContent(botDiv, answer);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 处理缓冲区中剩余的数据
+                    if (buffer.trim()) {
+                        const trimmedBuffer = buffer.trim();
+                        if (trimmedBuffer.startsWith('data:')) {
+                            const chunk = trimmedBuffer.substring(5).trim();
+                            if (chunk && chunk !== '[DONE]') {
                                 answer += chunk;
                                 updateTypingContent(botDiv, answer);
                             }

@@ -2,6 +2,7 @@ package com.xuxi.learningrag.service;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,6 @@ public class RagService {
                 .system("你是问答助手，必须遵守：\n" +
                         "1. 答案只能来自背景信息，禁止编造\n" +
                         "2. 背景信息无答案，只输出：抱歉，知识库中暂无相关信息\n" +
-                        "3. 回答简洁，不添加额外内容\n\n" +
                         "背景信息：\n" + context)
                 .user(question)
                 .stream()
