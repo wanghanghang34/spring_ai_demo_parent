@@ -6,6 +6,8 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/ai")
@@ -29,10 +31,25 @@ public class RagController {
         }
     }
 
-    // 基于知识库的问答
-    @PostMapping("/chat")
-    public ResponseEntity<String> chat(@RequestBody String question) {
-        String answer = ragService.answerQuestion(question);
-        return ResponseEntity.ok(answer);
+    // 基于知识库的问答（流式输出）
+    @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter chat(@RequestBody String question) {
+        SseEmitter emitter = new SseEmitter(300_000L); // 5分钟超时
+        new Thread(() -> {
+            try {
+                ragService.answerQuestionStream(question, chunk -> {
+                    try {
+                        emitter.send(chunk);
+                    } catch (Exception e) {
+                        emitter.completeWithError(e);
+                    }
+                });
+                emitter.send(SseEmitter.event().name("done").data("[DONE]"));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        }).start();
+        return emitter;
     }
 }

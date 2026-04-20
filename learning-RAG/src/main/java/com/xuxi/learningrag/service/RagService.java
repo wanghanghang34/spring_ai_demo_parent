@@ -7,6 +7,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 @Service
 public class RagService {
@@ -30,7 +31,9 @@ public class RagService {
         );
 
         // 2. 构建提示词上下文
-        assert similarDocs != null;
+        if (similarDocs == null || similarDocs.isEmpty()) {
+            return "抱歉，知识库中暂无相关信息";
+        }
         String context = similarDocs.stream()
                 .map(Document::getText)
                 .collect(Collectors.joining("\n\n"));
@@ -41,5 +44,34 @@ public class RagService {
                 .user(question)
                 .call()
                 .content();
+    }
+
+    /** 流式输出回答 */
+    public void answerQuestionStream(String question, Consumer<String> chunkConsumer) {
+        // 1. 向量检索
+        List<Document> similarDocs = vectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query(question)
+                        .topK(3)
+                        .build()
+        );
+
+        if (similarDocs == null || similarDocs.isEmpty()) {
+            chunkConsumer.accept("抱歉，知识库中暂无相关信息");
+            return;
+        }
+
+        String context = similarDocs.stream()
+                .map(Document::getText)
+                .collect(Collectors.joining("\n\n"));
+
+        // 2. 流式调用LLM（doOnNext逐块回调，blockLast阻塞直到流结束）
+        chatClient.prompt()
+                .system("请只基于以下背景信息回答问题。如果背景信息中没有答案，请说明'抱歉，知识库中暂无相关信息'。\n\n背景信息：\n" + context)
+                .user(question)
+                .stream()
+                .content()
+                .doOnNext(chunkConsumer)
+                .blockLast();
     }
 }
