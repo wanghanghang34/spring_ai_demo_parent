@@ -67,9 +67,11 @@ public class RagService {
 
         // 2. 流式调用LLM（doOnNext逐块回调，blockLast阻塞直到流结束）
         chatClient.prompt()
-                .system("请只基于以下背景信息回答问题。" +
-                            "如果背景信息中没有答案，" +
-                            "请说明'抱歉，知识库中暂无相关信息'。\n\n背景信息：\n" + context)
+                .system("你是问答助手，必须遵守：\n" +
+                        "1. 答案只能来自背景信息，禁止编造\n" +
+                        "2. 背景信息无答案，只输出：抱歉，知识库中暂无相关信息\n" +
+                        "3. 回答简洁，不添加额外内容\n\n" +
+                        "背景信息：\n" + context)
                 .user(question)
                 .stream()
                 .content()

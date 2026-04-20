@@ -223,11 +223,11 @@
         .msg.user  .avatar { background: #e8f0fe; }
         .msg.bot   .avatar { background: #e8f5e9; }
         .bubble {
-            max-width: 70%;
-            padding: 12px 16px;
+            max-width: 85%;
+            padding: 14px 18px;
             border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.7;
+            font-size: 15px;
+            line-height: 1.8;
             word-break: break-word;
             white-space: pre-wrap;
         }
@@ -240,6 +240,68 @@
             background: #f5f5f5;
             color: #333;
             border-bottom-left-radius: 4px;
+        }
+        /* Markdown 样式支持 */
+        .bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .bubble h1 { font-size: 20px; }
+        .bubble h2 { font-size: 18px; }
+        .bubble h3 { font-size: 16px; }
+        .bubble p { margin: 8px 0; }
+        .bubble ul, .bubble ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        .bubble li { margin: 4px 0; }
+        .bubble code {
+            background: rgba(0,0,0,0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+        }
+        .bubble pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .bubble pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        .bubble blockquote {
+            border-left: 4px solid #1a73e8;
+            padding-left: 12px;
+            margin: 10px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .bubble strong { font-weight: 600; color: #1a73e8; }
+        .bubble em { font-style: italic; }
+        .bubble a {
+            color: #1a73e8;
+            text-decoration: underline;
+        }
+        .bubble table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .bubble th, .bubble td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .bubble th {
+            background: #f5f5f5;
+            font-weight: 600;
         }
         .msg-time {
             font-size: 11px;
@@ -268,26 +330,32 @@
 
         /* 输入栏 */
         .chat-input-bar {
-            padding: 16px 20px;
+            padding: 20px 24px;
             border-top: 1px solid #f0f0f0;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: flex-end;
+            background: #fafafa;
         }
         .chat-input-bar textarea {
             flex: 1;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 15px;
             font-family: inherit;
             resize: none;
-            line-height: 1.5;
-            max-height: 120px;
+            line-height: 1.6;
+            max-height: 150px;
+            min-height: 50px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
+            background: white;
         }
-        .chat-input-bar textarea:focus { border-color: #1a73e8; }
+        .chat-input-bar textarea:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
         .btn-send {
             background: #1a73e8;
             color: white;
@@ -567,11 +635,13 @@
             div.className = 'msg ' + role;
 
             const isUser = role === 'user';
+            // 对 bot 消息使用 Markdown 渲染，用户消息纯文本
+            const content = isUser ? escapeHtml(text) : renderMarkdown(text);
             div.innerHTML = `
                 <div class="avatar">${isUser ? '🧑' : '🤖'}</div>
                 <div>
                     <div class="msg-time">${time}</div>
-                    <div class="bubble">${escapeHtml(text)}</div>
+                    <div class="bubble">${content}</div>
                 </div>`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
@@ -598,7 +668,7 @@
 
         function updateTypingContent(botDiv, content) {
             const bubble = botDiv.querySelector('.bubble');
-            if (bubble) bubble.textContent = content;
+            if (bubble) bubble.innerHTML = renderMarkdown(content);
             const container = document.getElementById('chatMessages');
             container.scrollTop = container.scrollHeight;
         }
@@ -616,6 +686,55 @@
 
         function escapeHtml(str) {
             return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        // 简单的 Markdown 渲染器
+        function renderMarkdown(text) {
+            if (!text) return '';
+            
+            let html = text;
+            
+            // 代码块 (```code```)
+            html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+                return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
+            });
+            
+            // 行内代码 (`code`)
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // 标题 (### ## #)
+            html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+            
+            // 粗体 (**text**)
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            
+            // 斜体 (*text*)
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            
+            // 引用 (> text)
+            html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+            
+            // 无序列表 (- item)
+            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+            
+            // 有序列表 (1. item)
+            html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+            
+            // 链接 [text](url)
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // 换行符转 <br>
+            html = html.replace(/\n/g, '<br>');
+            
+            // 清理多余的 <br> 标签在块级元素周围
+            html = html.replace(/<br>(<\/?(?:h[1-4]|ul|ol|li|pre|blockquote)>)/g, '$1');
+            html = html.replace(/(<\/?(?:h[1-4]|ul|ol|li|pre|blockquote)>)<br>/g, '$1');
+            
+            return html;
         }
     </script>
 </body>
