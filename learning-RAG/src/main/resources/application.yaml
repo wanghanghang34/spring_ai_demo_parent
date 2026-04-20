@@ -9,7 +9,7 @@ spring:
     ollama:
       base-url: http://localhost:11434
       chat:
-        model: qwen2.5:0.5b
+        model: qwen3:0.6b
       embedding:
         model: qwen3-embedding:0.6b
     vectorstore:
