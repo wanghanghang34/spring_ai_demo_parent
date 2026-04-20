@@ -1,13 +1,17 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/vectordb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
   ai:
-    # 配置Ollama连接
     ollama:
-      base-url: http://localhost:11435
+      base-url: http://localhost:11434
       chat:
-        model: qwen3.5:0.8b # 使用的对话模型
+        model: qwen3.5:0.8b
       embedding:
-        model: qwen3-embedding:0.6b # 使用的嵌入模型
-    # 配置PGVector连接
+        model: qwen3-embedding:0.6b
     vectorstore:
       pgvector:
         host: localhost
@@ -15,10 +19,14 @@ spring:
         database: vectordb
         username: postgres
         password: postgres
-        initialize-schema: true # 首次运行时自动创建所需的表和扩展
-        index-type: hnsw # 使用HNSW索引，检索效率高
-        dimensions: 768 # 向量维度，必须与嵌入模型的输出维度一致，nomic-embed-text是768维
+        initialize-schema: true
+        index-type: hnsw
+        dimensions: 1024
 
+management:
+  health:
+    db:
+      enabled: false
 
 #spring:
 #  datasource:

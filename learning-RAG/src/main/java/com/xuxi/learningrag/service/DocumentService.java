@@ -18,14 +18,18 @@ public class DocumentService {
         this.vectorStore = vectorStore;
     }
 
-    public void loadDocument(Resource pdfResource) {
+    public void loadDocument(Resource pdfResource, String fileName) {
         // 1. 读取PDF文档
         TikaDocumentReader reader = new TikaDocumentReader(pdfResource);
         List<Document> documents = reader.read();
-        // 2. 文档切块
+        // 2. 修正文档元数据中的source字段（InputStreamResource无法解析为URL）
+        for (Document doc : documents) {
+            doc.getMetadata().put("source", fileName != null ? fileName : "unknown");
+        }
+        // 3. 文档切块
         TokenTextSplitter splitter = new TokenTextSplitter();
         List<Document> splitDocuments = splitter.apply(documents);
-        // 3. 生成向量并存入PGVector
+        // 4. 生成向量并存入PGVector
         vectorStore.add(splitDocuments);
     }
 }

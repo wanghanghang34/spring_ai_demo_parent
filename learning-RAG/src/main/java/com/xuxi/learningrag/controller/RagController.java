@@ -22,7 +22,7 @@ public class RagController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadDocument(@RequestParam("file") MultipartFile file) {
         try {
-            documentService.loadDocument(new InputStreamResource(file.getInputStream()));
+            documentService.loadDocument(new InputStreamResource(file.getInputStream()), file.getOriginalFilename());
             return ResponseEntity.ok("文档上传并索引成功");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("上传失败: " + e.getMessage());

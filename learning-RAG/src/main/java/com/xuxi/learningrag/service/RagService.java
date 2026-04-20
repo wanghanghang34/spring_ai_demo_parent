@@ -23,10 +23,10 @@ public class RagService {
     public String answerQuestion(String question) {
         // 1. 使用 Builder 模式创建搜索请求，从向量数据库检索最相关的文档片段
         List<Document> similarDocs = vectorStore.similaritySearch(
-                SearchRequest.builder()   // 获取构建器实例
-                        .query(question)  // 设置查询文本
-                        .topK(3)          // 设置返回相似文档的最大数量
-                        .build()          // 构建最终的 SearchRequest 对象
+                SearchRequest.builder()
+                        .query(question)
+                        .topK(3)
+                        .build()
         );
 
         // 2. 构建提示词上下文
@@ -37,7 +37,7 @@ public class RagService {
 
         // 3. 调用LLM，要求其基于上下文回答问题
         return chatClient.prompt()
-                .system(s -> s.text("请只基于以下背景信息回答问题。如果背景信息中没有答案，请说明‘抱歉，知识库中暂无相关信息’。\n\n背景信息：\n{context}"))
+                .system("请只基于以下背景信息回答问题。如果背景信息中没有答案，请说明'抱歉，知识库中暂无相关信息'。\n\n背景信息：\n" + context)
                 .user(question)
                 .call()
                 .content();
