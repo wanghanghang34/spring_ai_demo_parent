@@ -1,6 +1,7 @@
 package com.xuxi.learningrag.service;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -73,6 +74,10 @@ public class RagService {
                         "2. 背景信息无答案，只输出：抱歉，知识库中暂无相关信息\n" +
                         "背景信息：\n" + context)
                 .user(question)
+//                .advisors(
+//                        QuestionAnswerAdvisor.builder(vectorStore)
+//                        // 3. 添加预处理，将用户输入的查询语句进行重写，使其更准确、更符合背景信息
+//                )
                 .stream()
                 .content()
                 .doOnNext(chunkConsumer)

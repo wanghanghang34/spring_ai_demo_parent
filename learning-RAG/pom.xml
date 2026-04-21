@@ -108,6 +108,11 @@
             <artifactId>spring-ai-tika-document-reader</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.ai</groupId>-->
+<!--            <artifactId>spring-ai-advisors-vector-store</artifactId>-->
+<!--        </dependency>-->
+
 
         <!-- Knife4j (swagger-bootstrap-ui的升级版，支持Spring Boot 3) -->
         <dependency>
