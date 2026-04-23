@@ -11,6 +11,8 @@
     <modules>
         <module>learning-common</module>
         <module>learning-RAG</module>
+        <module>langchain4j_demo</module>
+        <module>learning-springai-example</module>
     </modules>
 
 

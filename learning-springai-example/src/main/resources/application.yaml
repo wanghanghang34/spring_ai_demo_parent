@@ -1,0 +1,36 @@
+spring:
+  ai:
+    chat:
+      client:
+        #        默认情况下，Spring AI 会自动配置一个 ChatClient.Builder bean。 然而，您可能需要在应用程序中使用多个聊天模型。 以下是处理这种情况的方法：
+        #
+        #在所有情况下，您都需要通过设置属性spring.ai.chat.client.enabled=false来禁用ChatClient.Builder自动配置。
+        #
+        #这允许您手动创建多个 ChatClient 实例。
+        enabled: true
+#    anthropic:
+#      api-key: ${ANTHROPIC_API_KEY}
+#      base-url:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+#      base-url: https://api.openai.com
+#      (国内使用)
+      base-url: https://api.chatanywhere.tech
+#      chat:
+#        options:
+#          model: gpt-3.5-turbo
+      #      (国外使用)
+#      base-url: https://api.chatanywhere.org
+      proxy:
+        http:
+          host: ${PROXY_HOST:127.0.0.1}
+          port: ${PROXY_PORT:7890}
+
+#    ollama:
+#      base-url: http://localhost:11434
+#      chat:
+#        model: qwen3:0.6b
+
+
+server:
+  port: 8080
