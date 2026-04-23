@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolCallAdvisor 测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .api-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .api-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .response-area {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-area pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .loading {
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .error {
+            color: #dc3545;
+            border-left-color: #dc3545;
+        }
+
+        .success {
+            border-left-color: #28a745;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 ToolCallAdvisor 测试平台</h1>
+
+        <div class="grid">
+            <!-- 示例1：默认ToolCallAdvisor -->
+            <div class="api-section">
+                <h2>📝 示例1：默认ToolCallAdvisor</h2>
+                <div class="input-group">
+                    <label for="msg1">输入消息：</label>
+                    <input type="text" id="msg1" value="现在几点了？" placeholder="例如：现在几点了？">
+                </div>
+                <button onclick="testDefault()">测试默认配置</button>
+                <div class="response-area" id="response1"></div>
+            </div>
+
+            <!-- 示例2：带对话历史 -->
+            <div class="api-section">
+                <h2>💬 示例2：带对话历史</h2>
+                <div class="input-group">
+                    <label for="msg2">输入消息：</label>
+                    <input type="text" id="msg2" value="现在是什么时间？" placeholder="例如：现在是什么时间？">
+                </div>
+                <button onclick="testWithHistory()">测试对话历史</button>
+                <div class="response-area" id="response2"></div>
+            </div>
+
+            <!-- 示例3：自定义配置 -->
+            <div class="api-section">
+                <h2>⚙️ 示例3：自定义配置</h2>
+                <div class="input-group">
+                    <label for="msg3">输入消息：</label>
+                    <input type="text" id="msg3" value="计算2024-01-01到2024-12-31之间有多少天" placeholder="例如：计算两个日期之间的天数">
+                </div>
+                <button onclick="testCustom()">测试自定义配置</button>
+                <div class="response-area" id="response3"></div>
+            </div>
+
+            <!-- 示例4：复杂多工具调用 -->
+            <div class="api-section">
+                <h2>🎯 示例4：复杂多工具调用</h2>
+                <div class="input-group">
+                    <label for="msg4">输入消息：</label>
+                    <input type="text" id="msg4" value="现在几点了？帮我设置一个30分钟后的闹钟" placeholder="例如：设置一个闹钟">
+                </div>
+                <button onclick="testComplex()">测试复杂场景</button>
+                <div class="response-area" id="response4"></div>
+            </div>
+
+            <!-- 示例5：查看工具调用历史 -->
+            <div class="api-section">
+                <h2>📊 示例5：工具调用历史</h2>
+                <button onclick="viewHistory()">查看历史记录</button>
+                <button onclick="clearHistory()" style="margin-left: 10px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">清除历史</button>
+                <div class="response-area" id="response5"></div>
+            </div>
+
+            <!-- 示例6：性能对比 -->
+            <div class="api-section">
+                <h2>⚡ 示例6：性能对比测试</h2>
+                <button onclick="testPerformance()">运行性能测试</button>
+                <div class="response-area" id="response6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8080/api/toolcall-advisor';
+
+        async function makeRequest(url, responseId, method = 'GET', data = null) {
+            const responseArea = document.getElementById(responseId);
+            responseArea.className = 'response-area';
+            responseArea.innerHTML = '<p class="loading">⏳ 请求处理中...</p>';
+
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+
+                if (data && method !== 'GET') {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
+                const result = await response.json();
+
+                responseArea.className = 'response-area success';
+                responseArea.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                responseArea.className = 'response-area error';
+                responseArea.innerHTML = '<pre>❌ 错误：' + error.message + '</pre>';
+            }
+        }
+
+        function testDefault() {
+            const message = document.getElementById('msg1').value;
+            makeRequest(`${BASE_URL}/default?message=${encodeURIComponent(message)}`, 'response1');
+        }
+
+        function testWithHistory() {
+            const message = document.getElementById('msg2').value;
+            makeRequest(`${BASE_URL}/with-history?message=${encodeURIComponent(message)}`, 'response2');
+        }
+
+        function testCustom() {
+            const message = document.getElementById('msg3').value;
+            makeRequest(`${BASE_URL}/custom?message=${encodeURIComponent(message)}`, 'response3');
+        }
+
+        function testComplex() {
+            const message = document.getElementById('msg4').value;
+            makeRequest(`${BASE_URL}/complex?message=${encodeURIComponent(message)}`, 'response4');
+        }
+
+        function viewHistory() {
+            makeRequest(`${BASE_URL}/history`, 'response5');
+        }
+
+        function clearHistory() {
+            makeRequest(`${BASE_URL}/history/clear`, 'response5', 'POST');
+        }
+
+        function testPerformance() {
+            makeRequest(`${BASE_URL}/performance-comparison`, 'response6');
+        }
+
+        // 页面加载时显示欢迎信息
+        window.onload = function() {
+            console.log('🚀 ToolCallAdvisor 测试页面已加载');
+            console.log('📍 API地址:', BASE_URL);
+        };
+    </script>
+</body>
+</html>
