@@ -12,6 +12,13 @@ spring:
 #      api-key: ${ANTHROPIC_API_KEY}
 #      base-url:
     openai:
+      image:
+        api-key: ${OPENAI_API_KEY}
+        base-url: https://api.chatanywhere.tech
+        options:
+#          model: dall-e-2
+          response-format: URL
+          size: 1024x1024
       api-key: ${OPENAI_API_KEY}
 #      base-url: https://api.openai.com
 #      (国内使用)

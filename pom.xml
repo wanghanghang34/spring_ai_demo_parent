@@ -5,7 +5,7 @@
 
     <groupId>com.xuxi</groupId>
     <artifactId>spring-ai-demo-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -17,7 +17,7 @@
 
 
     <properties>
-
+        <revision>1.0.0-SNAPSHOT</revision>
         <java.version>17</java.version>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.source>17</maven.compiler.source>

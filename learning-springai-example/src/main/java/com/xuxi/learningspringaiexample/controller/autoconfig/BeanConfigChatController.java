@@ -1,6 +1,7 @@
 package com.xuxi.learningspringaiexample.controller.autoconfig;
 
 
+import com.xuxi.learningspringaiexample.tool.QueryDataBaseNsp;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BeanConfigChatController {
 
-//    @Resource(name = "openAiChatClient")
+    //    @Resource(name = "openAiChatClient")
     @Resource(name = "chatClient")
     private ChatClient chatClient;
 
@@ -18,6 +19,8 @@ public class BeanConfigChatController {
     String generation(@RequestParam("message") String message) {
         return this.chatClient.prompt()
                 .user(message)
+                // 调用获取时间工具
+                .tools(new QueryDataBaseNsp())
                 .call()
                 .content();
         /*
